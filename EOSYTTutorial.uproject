@@ -70,11 +70,15 @@
 			"Enabled": true
 		},
 		{
+			"Name": "EOSVoiceChat",
+			"Enabled": true
+		},
+		{
 			"Name": "EOSShared",
 			"Enabled": true
 		},
 		{
-			"Name": "EOSVoiceChat",
+			"Name": "OnlineSubsystemSteam",
 			"Enabled": true
 		}
 	]

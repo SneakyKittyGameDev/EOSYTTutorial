@@ -22,23 +22,17 @@ public:
 	virtual void Init() override;
 
 	void Login();
+	void OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
 
 	UFUNCTION(BlueprintCallable)
 	void CreateSession();
+	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
 	UFUNCTION(BlueprintCallable)
 	void DestroySession();
-	UFUNCTION(BlueprintCallable)
-	void FindSessions();
+	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
 protected:
 	class IOnlineSubsystem* OnlineSubsystem;
 
 	bool bIsLoggedIn;
-
-	TSharedPtr<FOnlineSessionSearch> SearchSettings;
-
-	void OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
-	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
-	void OnFindSessionsComplete(bool bWasSuccessful);
-	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type JoinResult);
 };
