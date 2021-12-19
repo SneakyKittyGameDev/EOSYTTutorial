@@ -31,6 +31,15 @@ public:
 	void DestroySession();
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
+	UFUNCTION(BlueprintCallable)
+	void GetAllFriends();
+	void OnGetAllFriendsComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
+
+	UFUNCTION(BlueprintCallable)
+	void ShowInviteUI();
+	UFUNCTION(BlueprintCallable)
+	void ShowFriendsUI();
+
 protected:
 	class IOnlineSubsystem* OnlineSubsystem;
 

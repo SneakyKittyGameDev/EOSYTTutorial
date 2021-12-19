@@ -4,8 +4,10 @@
 #include "EOSGameInstance.h"
 
 #include "Interfaces/OnlineIdentityInterface.h"
+#include "Interfaces/OnlineFriendsInterface.h"
+#include "Interfaces/OnlineExternalUIInterface.h"
 #include "OnlineSubsystem.h"
-#include "Kismet/GameplayStatics.h"
+#include "Interfaces/OnlineUserInterface.h"
 
 const FName TestSessionName = FName("Test Session");
 
@@ -126,6 +128,71 @@ void UEOSGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSucc
 		if (IOnlineSessionPtr SessionPtr = OnlineSubsystem->GetSessionInterface())
 		{
 			SessionPtr->ClearOnDestroySessionCompleteDelegates(this);
+		}
+	}
+}
+
+void UEOSGameInstance::GetAllFriends()
+{
+	if (bIsLoggedIn)
+	{
+		if (OnlineSubsystem)
+		{
+			if (IOnlineFriendsPtr FriendsPtr = OnlineSubsystem->GetFriendsInterface())
+			{
+				FriendsPtr->ReadFriendsList(0, FString(""), FOnReadFriendsListComplete::CreateUObject(this, &UEOSGameInstance::OnGetAllFriendsComplete));
+			}
+		}
+	}
+}
+
+void UEOSGameInstance::OnGetAllFriendsComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName,
+	const FString& ErrorStr)
+{
+	if (bWasSuccessful)
+	{
+		if (OnlineSubsystem)
+		{
+			if (IOnlineFriendsPtr FriendsPtr = OnlineSubsystem->GetFriendsInterface())
+			{
+				TArray<TSharedRef<FOnlineFriend>> FriendsList;
+				if (FriendsPtr->GetFriendsList(0, ListName, FriendsList))
+				{
+					for (TSharedRef<FOnlineFriend> Friend : FriendsList)
+					{
+						FString FriendName = Friend.Get().GetRealName();
+						UE_LOG(LogTemp, Warning, TEXT("Friend: %s"), *FriendName);
+					}
+				}
+			}
+		}
+	}
+}
+
+void UEOSGameInstance::ShowInviteUI()
+{
+	if (bIsLoggedIn)
+	{
+		if (OnlineSubsystem)
+		{
+			if (IOnlineExternalUIPtr UIPtr = OnlineSubsystem->GetExternalUIInterface())
+			{
+				UIPtr->ShowInviteUI(0, TestSessionName);
+			}
+		}
+	}
+}
+
+void UEOSGameInstance::ShowFriendsUI()
+{
+	if (bIsLoggedIn)
+	{
+		if (OnlineSubsystem)
+		{
+			if (IOnlineExternalUIPtr UIPtr = OnlineSubsystem->GetExternalUIInterface())
+			{
+				UIPtr->ShowFriendsUI(0);
+			}
 		}
 	}
 }
