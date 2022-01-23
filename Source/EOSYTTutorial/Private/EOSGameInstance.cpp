@@ -146,8 +146,7 @@ void UEOSGameInstance::GetAllFriends()
 	}
 }
 
-void UEOSGameInstance::OnGetAllFriendsComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName,
-	const FString& ErrorStr)
+void UEOSGameInstance::OnGetAllFriendsComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr)
 {
 	if (bWasSuccessful)
 	{
