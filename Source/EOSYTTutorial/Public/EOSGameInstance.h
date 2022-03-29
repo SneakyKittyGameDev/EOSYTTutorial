@@ -32,6 +32,12 @@ public:
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
 	UFUNCTION(BlueprintCallable)
+	void FindSessions();
+	void OnFindSessionsComplete(bool bWasSuccessful);
+	TSharedPtr<FOnlineSessionSearch> SearchSettings;
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	UFUNCTION(BlueprintCallable)
 	void GetAllFriends();
 	void OnGetAllFriendsComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
 

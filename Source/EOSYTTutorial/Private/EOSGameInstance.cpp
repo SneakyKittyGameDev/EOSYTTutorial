@@ -8,6 +8,7 @@
 #include "Interfaces/OnlineExternalUIInterface.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineUserInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 const FName TestSessionName = FName("Test Session");
 
@@ -128,6 +129,73 @@ void UEOSGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSucc
 		if (IOnlineSessionPtr SessionPtr = OnlineSubsystem->GetSessionInterface())
 		{
 			SessionPtr->ClearOnDestroySessionCompleteDelegates(this);
+		}
+	}
+}
+
+void UEOSGameInstance::FindSessions()
+{
+	if (bIsLoggedIn)
+	{
+		if (OnlineSubsystem)
+		{
+			if (IOnlineSessionPtr SessionPtr = OnlineSubsystem->GetSessionInterface())
+			{
+				SearchSettings = MakeShareable(new FOnlineSessionSearch());
+				SearchSettings->MaxSearchResults = 5000;
+				SearchSettings->QuerySettings.Set(SEARCH_KEYWORDS, FString("YTTutorialLobby"), EOnlineComparisonOp::Equals);
+				SearchSettings->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
+				
+				SessionPtr->OnFindSessionsCompleteDelegates.AddUObject(this, &UEOSGameInstance::OnFindSessionsComplete);
+				SessionPtr->FindSessions(0, SearchSettings.ToSharedRef());
+			}
+		}
+	}
+}
+
+void UEOSGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Success: %d"), bWasSuccessful);
+	if (bWasSuccessful)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Found %d  Lobbies"), SearchSettings->SearchResults.Num());
+		if (OnlineSubsystem)
+		{
+			if (IOnlineSessionPtr SessionPtr = OnlineSubsystem->GetSessionInterface())
+			{
+				if (SearchSettings->SearchResults.Num())
+				{
+					SessionPtr->OnJoinSessionCompleteDelegates.AddUObject(this, &UEOSGameInstance::OnJoinSessionComplete);
+					SessionPtr->JoinSession(0, TestSessionName, SearchSettings->SearchResults[0]);
+				}
+			}
+		}
+	}
+	
+	if (OnlineSubsystem)
+	{
+		if (IOnlineSessionPtr SessionPtr = OnlineSubsystem->GetSessionInterface())
+		{
+			SessionPtr->ClearOnFindSessionsCompleteDelegates(this);
+		}
+	}
+}
+
+void UEOSGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	if (OnlineSubsystem)
+	{
+		if (IOnlineSessionPtr SessionPtr = OnlineSubsystem->GetSessionInterface())
+		{
+			FString ConnectionInfo = FString();
+			SessionPtr->GetResolvedConnectString(SessionName, ConnectionInfo);
+			if (!ConnectionInfo.IsEmpty())
+			{
+				if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+				{
+					PC->ClientTravel(ConnectionInfo, ETravelType::TRAVEL_Absolute);
+				}
+			}
 		}
 	}
 }
